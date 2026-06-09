@@ -12,6 +12,7 @@ updateCartCount();
 
 let cart = readCart();
 let cartHTML = [];
+let selectedIds = new Set();
 
 //상품 개수 반영
 function updateCartCountFx() {
@@ -75,6 +76,7 @@ function updateSelectState() {
   selectAllText.textContent = `전체선택 (${checkedCount}/${checkboxes.length})`;
   //모두 체크시, 전체선택부분 체크 true
   selectAll.querySelector("input").checked = checkedCount > 0 && checkedCount === checkboxes.length;
+  selectedIds = new Set(getCheckedIds());
 }
 
 function renderCart() {
@@ -83,6 +85,10 @@ function renderCart() {
     el.remove();
   });
   cartHTML = [];
+
+  //selectedIds = new Set(getCheckedIds());
+  console.log(selectedIds);
+
   console.log(cart);
   if (cart.length === 0) {
     cartHTML.push(
@@ -95,7 +101,7 @@ function renderCart() {
       item =>
         `<article class="cart-item" data-id="${item.id}">
         <label class="item-check">
-          <input type="checkbox"/>               
+          <input type="checkbox" ${selectedIds.has(item.id) ? "checked" : ""}/>               
         </label>    
   
         <div class="cart-thumb">
@@ -134,15 +140,12 @@ function saveCart() {
 
 //선택 삭제
 selectDeleteBtn.addEventListener("click", () => {
-  const checkboxes = getCheckBoxes();
-  const checkedIds = checkboxes
-    .filter(checkbox => checkbox.checked)
-    .map(checkbox => Number(checkbox.closest(".cart-item").dataset.id));
-  console.log(checkedIds);
+  const checkedIds = getCheckedIds();
 
   if (checkedIds.length === 0) return;
 
   cart = cart.filter(item => !checkedIds.includes(item.id));
+
   saveCart();
   renderCart();
 });
@@ -160,3 +163,11 @@ selectAll.querySelector("input").addEventListener("change", e => {
   }
   updateSelectState();
 });
+
+function getCheckedIds() {
+  const checkboxes = getCheckBoxes();
+  return checkboxes
+    .filter(checkbox => checkbox.checked)
+    .map(checkbox => Number(checkbox.closest(".cart-item").dataset.id));
+  console.log(checkedIds);
+}
